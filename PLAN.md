@@ -1,10 +1,10 @@
 # PLAN
 
-Last updated: 2026-02-19
+Last updated: 2026-02-20
 
 ## 1) Mission
 
-`pi-opentelemetry`를 **npm 배포 가능한 Pi package**로 구현한다.
+`@devkade/pi-opentelemetry`를 **npm 배포 가능한 Pi package**로 구현한다.
 
 필수 범위:
 - Trace + Metrics + Diagnostics 통합
@@ -51,7 +51,7 @@ Last updated: 2026-02-19
 
 ## 7) Decision Lock-ins (Resolved)
 
-- O-001 (resolved): 패키지명은 `pi-opentelemetry`로 고정한다.
+- O-001 (resolved): 패키지명은 `@devkade/pi-opentelemetry`로 고정한다.
 - O-002 (resolved): `session.id`는 **metrics 라벨에 포함하지 않는다**. (trace/context에서만 사용)
 - O-003 (resolved): 기본 payload max bytes는 **32KB(32768)** 로 고정한다.
 

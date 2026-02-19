@@ -1,5 +1,5 @@
 {
-  "name": "pi-opentelemetry",
+  "name": "@devkade/pi-opentelemetry",
   "version": "0.1.0",
   "description": "OpenTelemetry trace + metrics + diagnostics extension for Pi Coding Agent",
   "type": "module",
@@ -20,6 +20,9 @@
     "telemetry"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20.0.0"
   },

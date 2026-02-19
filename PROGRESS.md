@@ -1,6 +1,6 @@
 # PROGRESS
 
-Last updated: 2026-02-19
+Last updated: 2026-02-20
 
 이 문서는 **append-only 실행 이력 로그**다.
 현재 작업 상태(권위)는 `PLAN.md`를 따른다.
@@ -108,3 +108,17 @@ Last updated: 2026-02-19
   result=`npm whoami` 실행 시 `401 Unauthorized` 확인 (현재 환경 npm 로그인 미완료)
   blocker=B-001 (npm registry auth 필요)
   next=`npm login` 후 `npm publish --access public` 재시도
+
+## 2026-02-20 (KST)
+
+- [03:42] actor=primary-agent task=T-007
+  action=homedoc extension 배포 정책 반영
+  result=`~/.pi/docs/pi-extension-publish-policy.md` 기준으로 `package.json.name`을 `@devkade/pi-opentelemetry`로 변경하고 `publishConfig.access=public` 추가, `package-lock.json` 루트 name 동기화 완료
+  blocker=none
+  next=`npm run release:check` 재검증
+
+- [03:44] actor=primary-agent task=T-007
+  action=release:check 재실행
+  result=`npm run release:check` 재통과(23 tests, typecheck, `npm pack --dry-run`), tarball `devkade-pi-opentelemetry-0.1.0.tgz` 14 files/49.2kB 확인
+  blocker=none
+  next=git commit 및 GitHub 원격 저장소 생성 후 push
