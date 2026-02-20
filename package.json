@@ -1,6 +1,6 @@
 {
   "name": "@devkade/pi-opentelemetry",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenTelemetry trace + metrics + diagnostics extension for Pi Coding Agent",
   "type": "module",
   "main": "./src/index.ts",
