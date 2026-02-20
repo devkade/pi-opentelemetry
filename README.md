@@ -78,6 +78,25 @@ export PI_OTEL_PAYLOAD_MAX_BYTES=32768
 /otel-open-trace  # print/open current trace URL
 ```
 
+### 3) (Recommended) run a local self-host backend
+
+```bash
+cd examples/self-host
+docker compose up -d
+```
+
+Then set Pi exporter env:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://127.0.0.1:4318/v1/traces
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://127.0.0.1:4318/v1/metrics
+export OTEL_TRACE_UI_BASE_URL=http://127.0.0.1:16686/trace
+```
+
+Detailed runbook (including Tailscale remote web access):
+- [docs/self-host-local-tailscale.md](./docs/self-host-local-tailscale.md)
+- [examples/self-host/README.md](./examples/self-host/README.md)
+
 ## Diagnostics Commands
 
 | Command | Description |
@@ -135,11 +154,13 @@ Published package artifacts are restricted by `package.json#files`.
 - `src/trace/*` - tracer/provider + span lifecycle management
 - `src/metrics/*` - meter/provider + usage metrics collector
 - `src/diagnostics/*` - `/otel-status`, `/otel-open-trace` helpers
-- `examples/otel-collector.yaml` - sample collector config
+- `examples/otel-collector.yaml` - minimal collector debug example
+- `examples/self-host/*` - local self-host stack (collector + jaeger + prometheus + grafana)
 
 ## Documentation Map
 
 - Agent entry: [AGENTS.md](./AGENTS.md)
 - Docs index: [docs/index.md](./docs/index.md)
+- Self-host + Tailscale guide: [docs/self-host-local-tailscale.md](./docs/self-host-local-tailscale.md)
 - Implementation plan: [PLAN.md](./PLAN.md)
 - Progress tracker: [PROGRESS.md](./PROGRESS.md)

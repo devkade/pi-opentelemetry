@@ -2,32 +2,32 @@
 
 ## Default Profile
 
-기본값은 **detailed-with-redaction** 이다.
+The default value is **detailed-with-redaction**.
 
-목표:
+Goals:
 
-- 디버깅/트래킹 품질을 유지한다.
-- 민감정보가 외부 OTLP backend로 유출되지 않도록 강제한다.
+- Preserve debugging and tracking quality
+- Enforce prevention of sensitive-data leakage to external OTLP backends
 
 ## Profiles
 
 ### 1) strict
-- payload 본문 미전송
-- 길이/성공여부/duration 등 메타데이터만 전송
+- Do not send payload bodies
+- Send only metadata such as length/success/duration
 
 ### 2) detailed-with-redaction (**default**)
-- payload 요약/본문 일부를 전송
-- 민감정보는 강제 마스킹
-- 길이 제한 + truncated 플래그 기록
+- Send payload summaries or partial payload bodies
+- Enforce masking of sensitive data
+- Apply length limits and record a truncated flag
 
-### 3) detailed-unsafe (금지)
-- 마스킹 없이 상세 payload 전송
-- 운영/공유 환경에서는 사용 금지
+### 3) detailed-unsafe (prohibited)
+- Send detailed payloads without masking
+- Prohibited in production/shared environments
 
 ## Mandatory Redaction Rules
 
 ### Key-based masking
-다음 키(대소문자 무시)와 유사 변형은 마스킹한다.
+Mask these keys (case-insensitive) and closely related variants.
 
 - `token`
 - `api_key`
@@ -39,30 +39,30 @@
 - `private_key`
 
 ### Value-pattern masking
-값 자체가 다음 패턴에 해당하면 마스킹한다.
+Mask values that match the following patterns.
 
-- JWT (`xxx.yyy.zzz` 형태)
-- OpenAI/기타 API key prefix (`sk-` 등)
-- 긴 base64-like 문자열
-- PEM/private key 블록 (`-----BEGIN ... PRIVATE KEY-----`)
+- JWT (`xxx.yyy.zzz` format)
+- OpenAI/other API key prefixes (e.g. `sk-`)
+- Long base64-like strings
+- PEM/private key blocks (`-----BEGIN ... PRIVATE KEY-----`)
 
-### Path denylist (payload capture skip)
-아래 경로/확장자는 payload 본문 수집을 생략한다.
+### Path denylist (skip payload capture)
+Skip payload body capture for these paths/extensions.
 
 - `.env`, `.env.*`
 - `*.pem`, `*.key`, `*.p12`
 - `id_rsa`, `id_ed25519`
-- credential/token 저장 파일
+- files that store credentials/tokens
 
 ## Payload Limits
 
-상세 모드에서도 무제한 전송은 금지한다.
+Even in detailed mode, unlimited payload transmission is prohibited.
 
-- 기본 최대 payload: **32KB**
-- 초과 시:
-  - 내용 truncate
-  - `payload.truncated=true`
-  - `payload.original_bytes` 기록
+- Default max payload: **32KB**
+- On overflow:
+  - truncate content
+  - set `payload.truncated=true`
+  - record `payload.original_bytes`
 
 ## Allowed vs Disallowed in Telemetry
 
@@ -71,18 +71,18 @@
 - success/failure
 - duration
 - token/cost usage
-- redacted payload preview/body (limit 내)
+- redacted payload preview/body (within limits)
 
 ### Disallowed
-- 원문 비밀값
-- 마스킹되지 않은 인증 헤더
-- private key/cert 본문
+- raw secret values
+- unmasked auth headers
+- private key/cert bodies
 
 ## Verification Requirements
 
-릴리즈 전 최소 검증:
+Minimum pre-release checks:
 
-1. redaction unit tests (key/value/path 각각)
-2. known-secret fixture 유출 테스트
-3. 최대 길이 초과 시 truncate 동작 테스트
-4. strict/detailed profile 스위치 테스트
+1. redaction unit tests (key/value/path each)
+2. known-secret fixture leak test
+3. truncate behavior test when max length is exceeded
+4. strict/detailed profile switch test

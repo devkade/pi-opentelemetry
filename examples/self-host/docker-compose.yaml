@@ -1,0 +1,76 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol/otel-collector.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/otel-collector.yaml:ro
+    ports:
+      - "127.0.0.1:4318:4318" # OTLP HTTP receiver (Pi extension -> collector)
+      - "127.0.0.1:4317:4317" # OTLP gRPC receiver (optional)
+    depends_on:
+      - jaeger
+    restart: unless-stopped
+    networks:
+      - observability
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    user: "0:0"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    volumes:
+      - jaeger-data:/badger
+    ports:
+      - "127.0.0.1:16686:16686" # Jaeger UI
+    restart: unless-stopped
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yaml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090" # Prometheus UI
+    depends_on:
+      - otel-collector
+    restart: unless-stopped
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3789:3000" # Grafana UI
+    depends_on:
+      - prometheus
+      - jaeger
+    restart: unless-stopped
+    networks:
+      - observability
+
+networks:
+  observability:
+    name: pi-otel-observability
+
+volumes:
+  jaeger-data:
+  prometheus-data:
+  grafana-data:

@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: pi-otel-dashboards
+    orgId: 1
+    folder: Pi OTel
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/dashboards

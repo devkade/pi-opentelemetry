@@ -2,16 +2,16 @@
 
 ## Runtime Modes
 
-- **Trace only**: 병목/오류 원인 분석 중심
-- **Metrics only**: 비용/사용량 대시보드 중심
-- **Unified (권장)**: Trace + Metrics + Diagnostics
+- **Trace only**: Focus on bottleneck/error root-cause analysis
+- **Metrics only**: Focus on cost/usage dashboards
+- **Unified (recommended)**: Trace + Metrics + Diagnostics
 
-기본 운영 모드는 Unified.
+The default operating mode is Unified.
 
 ## Required Environment
 
 ```bash
-# extension enable flag (프로젝트 정책에 맞게 사용)
+# extension enable flag (use according to project policy)
 export PI_OTEL_ENABLE=1
 
 # traces endpoint
@@ -24,48 +24,55 @@ export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://localhost:4318/v1/metrics
 export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer <token>"
 ```
 
+## Personal Self-host Deployment (Recommended)
+
+For always-on personal usage, run a local backend stack and access only web UIs via Tailscale.
+
+- overview/policy: [self-host-local-tailscale.md](./self-host-local-tailscale.md)
+- runnable compose/runbook: [../examples/self-host/README.md](../examples/self-host/README.md)
+
 ## Diagnostic Commands (Spec)
 
 ### `/otel-status`
-목적: 현재 telemetry 파이프라인의 상태 확인
+Purpose: inspect the current telemetry pipeline status
 
-출력 포함 항목:
+Expected output includes:
 
-- extension enabled 여부
-- active exporter 종류
-- trace/metrics endpoint
-- 누적 session/turn/tool/prompt 카운트
-- 누적 token/cost
-- 마지막 session/turn/tool duration
+- extension enabled state
+- active exporter types
+- trace/metrics endpoints
+- cumulative session/turn/tool/prompt counts
+- cumulative token/cost usage
+- last session/turn/tool duration
 - privacy profile (`strict` / `detailed-with-redaction`)
-- last error (있을 경우)
+- last error (if present)
 
 ### `/otel-open-trace`
-목적: 현재 세션 trace URL 생성/오픈
+Purpose: generate/open the current session trace URL
 
-출력 포함 항목:
+Expected output includes:
 
 - trace id
 - primary trace URL (Jaeger/Tempo)
-- (가능한 경우) 원격 접근 URL
+- remote-access URL (when available)
 
 ## Operational Checks
 
 ### Start-up checks
-1. endpoint 유효성 확인
-2. exporter 초기화 성공 여부 확인
-3. session_start 이벤트 수집 여부 확인
+1. Verify endpoint validity
+2. Verify exporter initialization success
+3. Verify `session_start` event capture
 
 ### Continuous checks
-1. tool_result 누락으로 orphan span이 늘지 않는지 확인
-2. metrics export interval 내 정상 flush 확인
-3. redaction 적용 실패 로그가 없는지 확인
+1. Ensure orphan spans are not increasing due to missing `tool_result`
+2. Ensure successful flush within the metrics export interval
+3. Ensure there are no logs indicating redaction-application failure
 
 ## Failure Handling
 
-- OTLP 전송 실패는 에이전트 실행을 중단시키지 않는다.
-- 전송 실패는 내부 상태(`last error`) 및 로그에 기록한다.
-- 일시적 실패 시 재시도는 exporter 기본 정책을 따른다.
+- OTLP transmission failures must not interrupt agent execution.
+- Transmission failures are recorded in internal state (`last error`) and logs.
+- Retry behavior for transient failures follows the exporter default policy.
 
 ## Suggested Dashboards
 
