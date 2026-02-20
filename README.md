@@ -137,10 +137,31 @@ npm run release:check
 
 `npm run release:check` runs tests, type checks, and `npm pack --dry-run`.
 
-## Release
+## Release (GitHub Actions → npm)
+
+One-time setup:
+
+1. Configure npm Trusted Publishing for `devkade/pi-opentelemetry` (scope: `@devkade`).
+2. Keep `package.json.version` and release tag (`vX.Y.Z`) in sync.
+
+Release flow:
 
 ```bash
-npm whoami
+npm version patch   # or minor / major
+git push origin main --follow-tags
+```
+
+Tag push (`v*.*.*`) triggers `.github/workflows/release.yml`, which:
+
+- runs `npm run release:check`
+- verifies tag/package version match
+- publishes to npm with provenance (`npm publish --access public --provenance`)
+- creates a GitHub Release
+
+Manual fallback (if needed):
+
+```bash
+npm run release:check
 npm publish --access public
 ```
 
