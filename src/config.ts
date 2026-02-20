@@ -105,7 +105,7 @@ export function getConfig(env: NodeJS.ProcessEnv = process.env): TelemetryConfig
   return {
     enabled: asBool(readEnv(env, "OTEL_ENABLE"), true),
     serviceName: readEnv(env, "OTEL_SERVICE_NAME") ?? "pi-opentelemetry",
-    serviceVersion: readEnv(env, "OTEL_SERVICE_VERSION") ?? "0.1.1",
+    serviceVersion: readEnv(env, "OTEL_SERVICE_VERSION") ?? "0.1.2",
     traceUiBaseUrl: readEnv(env, "OTEL_TRACE_UI_BASE_URL") ?? DEFAULT_TRACE_UI_BASE,
     privacy: {
       profile: parsePrivacyProfile(readEnv(env, "OTEL_PRIVACY_PROFILE")),

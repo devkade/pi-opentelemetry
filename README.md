@@ -35,7 +35,7 @@ pi install npm:@devkade/pi-opentelemetry
 ```bash
 pi install git:github.com/devkade/pi-opentelemetry@main
 # or pin a tag
-pi install git:github.com/devkade/pi-opentelemetry@v0.1.1
+pi install git:github.com/devkade/pi-opentelemetry@v0.1.2
 ```
 
 ### Local development run
@@ -110,7 +110,7 @@ Detailed runbook (including Tailscale remote web access):
 |---|---|---|
 | `OTEL_ENABLE` | `true` | Global telemetry on/off |
 | `OTEL_SERVICE_NAME` | `pi-opentelemetry` | OTel service name |
-| `OTEL_SERVICE_VERSION` | `0.1.1` | OTel service version |
+| `OTEL_SERVICE_VERSION` | `0.1.2` | OTel service version |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | - | Base OTLP endpoint (auto-resolves traces/metrics paths) |
 | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | `http://localhost:4318/v1/traces` | Trace endpoint |
 | `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | `http://localhost:4318/v1/metrics` | Metrics endpoint |
