@@ -38,7 +38,11 @@ Local UIs on host machine:
 
 - Grafana: `http://127.0.0.1:3789` (`admin` / `admin`)
   - first login: change password if prompted
-  - preloaded dashboard: `Pi OTel / Pi OTel Overview`
+  - preloaded dashboards:
+    - `Pi OTel / Pi OTel Overview`
+    - `Pi OTel / Pi OTel Ops Live`
+    - `Pi OTel / Pi OTel Efficiency & Decision`
+  - provisioned alert rules folder: `Pi OTel Alerts`
 - Jaeger: `http://127.0.0.1:16686`
 - Prometheus: `http://127.0.0.1:9090`
 
@@ -53,6 +57,14 @@ Then run Pi with extension and verify:
 ```bash
 pi -e ./src/index.ts "/otel-status"
 pi -e ./src/index.ts "/otel-open-trace"
+```
+
+`OTEL_SERVICE_NAME` is auto-detected from the nearest project `package.json#name` (fallback: directory name).
+Use manual override only when needed:
+
+```bash
+# optional
+export OTEL_SERVICE_NAME=my-project-name
 ```
 
 ## 3) Remote web access with Tailscale
@@ -94,21 +106,26 @@ Then open locally on your MacBook:
 - `http://127.0.0.1:3789` (Grafana)
 - `http://127.0.0.1:16686` (Jaeger)
 
-## 4) Suggested first dashboards in Grafana
+## 4) Provisioned dashboards + alert rules
 
-Use Prometheus datasource with these starter queries:
+Provisioned dashboard JSON files:
 
-- Sessions: `sum(increase(pi_session_count_total[1h]))`
-- Turns: `sum(increase(pi_turn_count_total[1h]))`
-- Tool calls: `sum(increase(pi_tool_call_count_total[1h]))`
-- Token input/output:
-  - `sum(increase(pi_token_usage_tokens_total{type="input"}[1h]))`
-  - `sum(increase(pi_token_usage_tokens_total{type="output"}[1h]))`
-- Cost total: `sum(increase(pi_cost_usage_USD_total[1h]))`
-- Tool p95 latency:
-  - `histogram_quantile(0.95, sum(rate(pi_tool_duration_seconds_bucket[5m])) by (le, tool_name))`
+- `grafana/dashboards/pi-otel-overview.json`
+- `grafana/dashboards/pi-otel-ops-live.json`
+- `grafana/dashboards/pi-otel-efficiency-decision.json`
 
-> Exact metric names can vary by collector/exporter normalization. Verify names in Prometheus first (`/graph` autocomplete).
+Provisioned alert rules file:
+
+- `grafana/provisioning/alerting/pi-otel-alert-rules.yaml`
+
+Default alert set:
+
+- Collector down (`up{job="pi-otel-collector"} < 1`, 5m)
+- Tool error rate warning/critical (>5% / >10%, 10m)
+- Turn p95 warning/critical (>8s / >12s, 15m)
+- Cost-per-turn regression warning (>1.3x vs 7-day baseline, 30m)
+
+> Alert rules are provisioned in Grafana, but notification routing (Slack/Email/Webhook) is environment-specific. Configure contact points and policy in Grafana UI after first boot.
 
 ## 5) Data persistence and retention
 

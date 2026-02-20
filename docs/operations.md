@@ -14,6 +14,9 @@ The default operating mode is Unified.
 # extension enable flag (use according to project policy)
 export PI_OTEL_ENABLE=1
 
+# optional project label override (auto-detected from project by default)
+# export OTEL_SERVICE_NAME=my-project-name
+
 # traces endpoint
 export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
 
@@ -39,6 +42,7 @@ Purpose: inspect the current telemetry pipeline status
 Expected output includes:
 
 - extension enabled state
+- resolved service name (project auto-detect or manual override)
 - active exporter types
 - trace/metrics endpoints
 - cumulative session/turn/tool/prompt counts
@@ -76,11 +80,28 @@ Expected output includes:
 
 ## Suggested Dashboards
 
+Provisioned starter dashboards (self-host bundle):
+
+- `Pi OTel Overview`
+- `Pi OTel Ops Live`
+- `Pi OTel Efficiency & Decision`
+
+Key interpretation lens:
+
 1. Usage Overview
    - sessions/day, turns/day, prompts/day
 2. Cost & Tokens
-   - input/output/cache tokens, daily cost
+   - input/output/cache tokens, daily cost, cost/turn
 3. Tool Reliability
-   - tool success rate, p95 tool duration
+   - tool success rate, failure burst, p95 tool duration
 4. Session Quality
-   - turns per session, avg session duration
+   - turns per session, avg/p95 turn duration
+
+## Suggested Alerts (Provisioned)
+
+- Collector down (`up{job="pi-otel-collector"} < 1`, 5m)
+- Tool error rate warning/critical (>5% / >10%, 10m)
+- Turn p95 warning/critical (>8s / >12s, 15m)
+- Cost-per-turn regression warning (>1.3x vs 7-day baseline, 30m)
+
+Tune thresholds to your own baseline after 1-2 weeks of data.

@@ -35,7 +35,7 @@ pi install npm:@devkade/pi-opentelemetry
 ```bash
 pi install git:github.com/devkade/pi-opentelemetry@main
 # or pin a tag
-pi install git:github.com/devkade/pi-opentelemetry@v0.1.2
+pi install git:github.com/devkade/pi-opentelemetry@v0.1.3
 ```
 
 ### Local development run
@@ -51,6 +51,9 @@ pi -e ./src/index.ts
 ```bash
 # enable/disable (default: true)
 export PI_OTEL_ENABLE=1
+
+# optional: override auto-detected project service name
+# export OTEL_SERVICE_NAME=my-project-name
 
 # traces
 export OTEL_TRACES_EXPORTER=otlp
@@ -97,6 +100,10 @@ Detailed runbook (including Tailscale remote web access):
 - [docs/self-host-local-tailscale.md](./docs/self-host-local-tailscale.md)
 - [examples/self-host/README.md](./examples/self-host/README.md)
 
+Self-host bundle includes pre-provisioned Grafana assets:
+- dashboards: `Pi OTel Overview`, `Pi OTel Ops Live`, `Pi OTel Efficiency & Decision`
+- alerts: `Pi OTel Alerts` (collector down, tool error rate, turn p95, cost-per-turn regression)
+
 ## Diagnostics Commands
 
 | Command | Description |
@@ -109,8 +116,10 @@ Detailed runbook (including Tailscale remote web access):
 | Key | Default | Description |
 |---|---|---|
 | `OTEL_ENABLE` | `true` | Global telemetry on/off |
-| `OTEL_SERVICE_NAME` | `pi-opentelemetry` | OTel service name |
-| `OTEL_SERVICE_VERSION` | `0.1.2` | OTel service version |
+| `OTEL_SERVICE_NAME` | auto (nearest `package.json#name` → directory name → `pi-opentelemetry`) | OTel service name (`PI_` prefix supported) |
+| `OTEL_SERVICE_NAME_AUTO` | `true` | Enable/disable automatic project-based service name detection |
+| `OTEL_PROJECT_ROOT` | `process.cwd()` | Optional root override used only for auto service name detection |
+| `OTEL_SERVICE_VERSION` | `0.1.3` | OTel service version |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | - | Base OTLP endpoint (auto-resolves traces/metrics paths) |
 | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | `http://localhost:4318/v1/traces` | Trace endpoint |
 | `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | `http://localhost:4318/v1/metrics` | Metrics endpoint |

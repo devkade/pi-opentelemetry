@@ -133,6 +133,7 @@ export default function piOpenTelemetryExtension(pi: ExtensionAPI): void {
     handler: async (_args: string, ctx: ExtensionCommandContext) => {
       const text = formatOtelStatus({
         enabled: config.enabled,
+        serviceName: config.serviceName,
         privacyProfile: config.privacy.profile,
         traceExporter: config.traces.exporter,
         metricsExporters: config.metrics.exporters,

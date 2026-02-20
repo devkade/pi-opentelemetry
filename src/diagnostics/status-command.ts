@@ -2,6 +2,7 @@ import type { MetricsExporter, PrivacyProfile, TelemetryStatus, TraceExporter } 
 
 export interface StatusSnapshot {
   enabled: boolean;
+  serviceName: string;
   privacyProfile: PrivacyProfile;
   traceExporter: TraceExporter;
   metricsExporters: MetricsExporter[];
@@ -25,6 +26,7 @@ export function formatOtelStatus(snapshot: StatusSnapshot): string {
   return [
     "OTel Telemetry Status",
     `Enabled: ${snapshot.enabled ? "yes" : "no"}`,
+    `Service: ${snapshot.serviceName}`,
     `Privacy: ${snapshot.privacyProfile}`,
     `Trace exporter: ${snapshot.traceExporter}`,
     `Metrics exporters: ${snapshot.metricsExporters.join(", ")}`,

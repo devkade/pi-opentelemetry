@@ -5,6 +5,7 @@ describe("status command", () => {
   it("formats runtime snapshot", () => {
     const text = formatOtelStatus({
       enabled: true,
+      serviceName: "acme-agent-ops",
       privacyProfile: "detailed-with-redaction",
       traceExporter: "otlp",
       metricsExporters: ["otlp", "console"],
@@ -31,6 +32,7 @@ describe("status command", () => {
 
     expect(text).toContain("OTel Telemetry Status");
     expect(text).toContain("Enabled: yes");
+    expect(text).toContain("Service: acme-agent-ops");
     expect(text).toContain("Privacy: detailed-with-redaction");
     expect(text).toContain("Sessions: 1");
     expect(text).toContain("Tool calls/results: 3/3");

@@ -1,5 +1,8 @@
+import { existsSync, readFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import type { MetricsExporter, PrivacyProfile, TelemetryConfig, TraceExporter } from "./types.js";
 
+const DEFAULT_SERVICE_NAME = "pi-opentelemetry";
 const DEFAULT_TRACES_ENDPOINT = "http://localhost:4318/v1/traces";
 const DEFAULT_METRICS_ENDPOINT = "http://localhost:4318/v1/metrics";
 const DEFAULT_TRACE_UI_BASE = "http://localhost:16686/trace";
@@ -39,6 +42,60 @@ function splitComma(value: string | undefined): string[] {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function sanitizeServiceName(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, "")
+    .replace(/[\/\s]+/g, "-")
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-_.]+|[-_.]+$/g, "");
+
+  return normalized || DEFAULT_SERVICE_NAME;
+}
+
+function findNearestPackageName(startDir: string): string | undefined {
+  let current = startDir;
+
+  while (true) {
+    const packageJsonPath = join(current, "package.json");
+    if (existsSync(packageJsonPath)) {
+      try {
+        const parsed = JSON.parse(readFileSync(packageJsonPath, "utf8")) as { name?: unknown };
+        if (typeof parsed.name === "string" && parsed.name.trim().length > 0) {
+          return parsed.name.trim();
+        }
+      } catch {
+        // ignore invalid/unreadable package.json and continue upward
+      }
+    }
+
+    const parent = dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  return undefined;
+}
+
+function resolveServiceName(env: NodeJS.ProcessEnv): string {
+  const explicit = readEnv(env, "OTEL_SERVICE_NAME")?.trim();
+  if (explicit) return explicit;
+
+  const autoEnabled = asBool(readEnv(env, "OTEL_SERVICE_NAME_AUTO"), true);
+  if (!autoEnabled) return DEFAULT_SERVICE_NAME;
+
+  const projectRoot = readEnv(env, "OTEL_PROJECT_ROOT") ?? process.cwd();
+
+  const packageName = findNearestPackageName(projectRoot);
+  if (packageName) {
+    return sanitizeServiceName(packageName);
+  }
+
+  return sanitizeServiceName(basename(projectRoot));
 }
 
 export function parseKeyValuePairs(raw: string | undefined): Record<string, string> {
@@ -104,8 +161,8 @@ export function getConfig(env: NodeJS.ProcessEnv = process.env): TelemetryConfig
 
   return {
     enabled: asBool(readEnv(env, "OTEL_ENABLE"), true),
-    serviceName: readEnv(env, "OTEL_SERVICE_NAME") ?? "pi-opentelemetry",
-    serviceVersion: readEnv(env, "OTEL_SERVICE_VERSION") ?? "0.1.2",
+    serviceName: resolveServiceName(env),
+    serviceVersion: readEnv(env, "OTEL_SERVICE_VERSION") ?? "0.1.3",
     traceUiBaseUrl: readEnv(env, "OTEL_TRACE_UI_BASE_URL") ?? DEFAULT_TRACE_UI_BASE,
     privacy: {
       profile: parsePrivacyProfile(readEnv(env, "OTEL_PRIVACY_PROFILE")),

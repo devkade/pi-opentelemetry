@@ -15,12 +15,14 @@ Pi (`@devkade/pi-opentelemetry`)
 
 ## Reference Implementation
 
-Use the compose bundle (includes Grafana datasource + starter dashboard provisioning):
+Use the compose bundle (includes Grafana datasource + dashboards + alert provisioning):
 
 - `examples/self-host/docker-compose.yaml`
 - `examples/self-host/otel-collector.yaml`
 - `examples/self-host/prometheus.yaml`
 - `examples/self-host/grafana/provisioning/datasources/datasources.yaml`
+- `examples/self-host/grafana/provisioning/alerting/pi-otel-alert-rules.yaml`
+- `examples/self-host/grafana/dashboards/*.json`
 - `examples/self-host/README.md` (runbook)
 
 ## Security Baseline

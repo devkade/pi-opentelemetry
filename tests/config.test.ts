@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getConfig, parseKeyValuePairs, resolveOtlpEndpoint } from "../src/config.js";
 
@@ -13,6 +16,7 @@ describe("config", () => {
     const config = getConfig({});
 
     expect(config.enabled).toBe(true);
+    expect(config.serviceName.length).toBeGreaterThan(0);
     expect(config.privacy.profile).toBe("detailed-with-redaction");
     expect(config.privacy.payloadMaxBytes).toBe(32 * 1024);
     expect(config.traces.exporter).toBe("otlp");
@@ -21,6 +25,42 @@ describe("config", () => {
     expect(config.metrics.endpoint).toBe("http://localhost:4318/v1/metrics");
     expect(config.metrics.exportIntervalMs).toBe(60_000);
     expect(config.traceUiBaseUrl).toBe("http://localhost:16686/trace");
+  });
+
+  it("auto-detects service name from nearest package.json", () => {
+    const root = mkdtempSync(join(tmpdir(), "pi-otel-config-"));
+
+    try {
+      const nested = join(root, "apps", "cli");
+      mkdirSync(nested, { recursive: true });
+      writeFileSync(join(root, "package.json"), JSON.stringify({ name: "@acme/agent-ops" }), "utf8");
+
+      const config = getConfig({
+        OTEL_PROJECT_ROOT: nested,
+      });
+
+      expect(config.serviceName).toBe("acme-agent-ops");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("uses explicit service name override", () => {
+    const config = getConfig({
+      PI_OTEL_SERVICE_NAME: "my-custom-service",
+      OTEL_PROJECT_ROOT: "/tmp/ignored",
+    });
+
+    expect(config.serviceName).toBe("my-custom-service");
+  });
+
+  it("falls back to default service name when auto detection is disabled", () => {
+    const config = getConfig({
+      OTEL_SERVICE_NAME_AUTO: "false",
+      OTEL_PROJECT_ROOT: "/tmp/ignored",
+    });
+
+    expect(config.serviceName).toBe("pi-opentelemetry");
   });
 
   it("supports strict profile and exporter override", () => {
