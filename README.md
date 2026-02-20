@@ -165,6 +165,15 @@ npm run release:check
 npm publish --access public
 ```
 
+### Release troubleshooting
+
+- `E404 Not Found` on `npm publish`:
+  - confirm `package.json.name` matches your scope (`@devkade/pi-opentelemetry`)
+  - confirm npm account has publish permission for `@devkade` scope
+  - for GitHub Actions Trusted Publishing, confirm publisher mapping to `devkade/pi-opentelemetry`
+- `You cannot publish over the previously published versions`:
+  - bump version first (`npm version patch|minor|major`) and push tag again
+
 Published package artifacts are restricted by `package.json#files`.
 
 ## Project Structure
@@ -183,5 +192,3 @@ Published package artifacts are restricted by `package.json#files`.
 - Agent entry: [AGENTS.md](./AGENTS.md)
 - Docs index: [docs/index.md](./docs/index.md)
 - Self-host + Tailscale guide: [docs/self-host-local-tailscale.md](./docs/self-host-local-tailscale.md)
-- Implementation plan: [PLAN.md](./PLAN.md)
-- Progress tracker: [PROGRESS.md](./PROGRESS.md)
